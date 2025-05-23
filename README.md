@@ -2,6 +2,14 @@
 
 A visual maze generation and pathfinding demonstration built with Rust, using macroquad for graphics and knossos for maze generation. The program generates random mazes and shows how the A* pathfinding algorithm finds the optimal path from start to finish.
 
+<p align="center">
+  <img src="assets/maze-demo.gif" alt="Maze Generator Demo">
+</p>
+
+<p align="center">
+  <em>Demonstration showing maze generation, A* pathfinding visualization, and sprite navigation</em>
+</p>
+
 ## Building and Running
 
 1. Ensure you have Rust installed (built with rust v1.87.0)
