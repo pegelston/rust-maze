@@ -10,8 +10,11 @@ use knossos::{
 const CELL_SIZE: f32 = 40.0;  // Made cells bigger for better visibility
 const WALL_THICKNESS: f32 = 2.0;
 
-const WINDOW_WIDTH: usize = 1000;
-const WINDOW_HEIGHT: usize = 1000;
+const OFFSET_X: f32 = 50.0;  // Padding from left
+const OFFSET_Y: f32 = 50.0;  // Padding from top
+
+const WINDOW_WIDTH: f32 = 1000.0;
+const WINDOW_HEIGHT: f32 = 1000.0;
 
 fn window_conf() -> Conf {
     Conf {
@@ -25,83 +28,28 @@ fn window_conf() -> Conf {
 #[macroquad::main(window_conf)]
 async fn main() {
     let maze = OrthogonalMazeBuilder::new()
-        .height(WINDOW_HEIGHT / CELL_SIZE as usize)
-        .width(WINDOW_WIDTH / CELL_SIZE as usize)
+        .height((WINDOW_HEIGHT / CELL_SIZE) as usize)
+        .width((WINDOW_WIDTH / CELL_SIZE) as usize)
         .algorithm(Box::new(Prim::new()))
         .build();
 
-    println!("{}", &maze);
+    loop {
+        clear_background(WHITE);
 
-    // loop {
-    //     clear_background(WHITE);
+        for y in 0..maze.height() {
+            for x in 0..maze.width() {
+                if !maze.is_carved((x, y), Cell::NORTH) {
+                    draw_rectangle(
+                        OFFSET_X + x as f32 * CELL_SIZE,
+                        OFFSET_Y + y as f32 * CELL_SIZE,
+                        CELL_SIZE,
+                        WALL_THICKNESS,
+                        BLACK,
+                    );
+                }
+            }
+        }
         
-    //     let offset_x = 50;  // Padding from left
-    //     let offset_y = 50;  // Padding from top
-
-    //     // Draw the maze
-    //     for y in 0..maze.height() {
-    //         for x in 0..maze.width() {
-    //             let cell_x = offset_x + x as usize * 40;
-    //             let cell_y = offset_y + y as usize * 40;
-
-    //             let coords = (cell_x, cell_y);
-
-    //             // Draw walls if there's no passage
-    //             // North wall
-    //             if !maze.is_carved(coords, Cell::NORTH) {
-    //                 draw_rectangle(
-    //                     cell_x as f32,
-    //                     cell_y as f32,
-    //                     CELL_SIZE,
-    //                     WALL_THICKNESS,
-    //                     BLACK,
-    //                 );
-    //             }
-
-    //             // West wall
-    //             if !maze.is_carved(coords, Cell::WEST) {
-    //                 draw_rectangle(
-    //                     cell_x as f32,
-    //                     cell_y as f32,
-    //                     WALL_THICKNESS,
-    //                     CELL_SIZE,
-    //                     BLACK,
-    //                 );
-    //             }
-
-    //             // // Draw East wall if we're at the last column
-    //             // if x == maze.width() - 1 {
-    //             //     draw_rectangle(
-    //             //         cell_x + CELL_SIZE,
-    //             //         cell_y,
-    //             //         WALL_THICKNESS,
-    //             //         CELL_SIZE,
-    //             //         BLACK,
-    //             //     );
-    //             // }
-
-    //             // // Draw South wall if we're at the last row
-    //             // if y == maze.height() - 1 {
-    //             //     draw_rectangle(
-    //             //         cell_x,
-    //             //         cell_y + CELL_SIZE,
-    //             //         CELL_SIZE + WALL_THICKNESS,
-    //             //         WALL_THICKNESS,
-    //             //         BLACK,
-    //             //     );
-    //             // }
-    //         }
-    //     }
-
-    //     // // Generate new maze when space is pressed
-    //     // if is_key_pressed(KeyCode::Space) {
-    //     //     maze = OrthogonalMazeBuilder::new()
-    //     //         .height(10)
-    //     //         .width(10)
-    //     //         .algorithm(Box::new(Prim::new()))
-    //     //         .build();
-    //     // }
-        
-    //     next_frame().await
-    // }
+        next_frame().await
+    }
 }
