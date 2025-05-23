@@ -4,7 +4,7 @@ use knossos::{
         Cell,
         OrthogonalMaze,
         OrthogonalMazeBuilder,
-        Prim,
+        Kruskal,
     },
 };
 use std::collections::{BinaryHeap, HashMap};
@@ -83,6 +83,7 @@ struct GameState {
     path: Vec<Position>,
     current_path_index: usize,
     debug_info: HashMap<Position, CellDebugInfo>,
+    show_debug: bool,
 }
 
 impl GameState {
@@ -104,6 +105,7 @@ impl GameState {
             path,
             current_path_index: 0,
             debug_info,
+            show_debug: false,
         }
     }
 
@@ -162,12 +164,12 @@ impl GameState {
                         _ => continue,
                     };
 
-                    let tentative_g_score = g_score[&current.pos] + 1;
+                    let tentative_g_score = g_score[&current.pos] + 1; // Cost to reach neighbor
                     if !g_score.contains_key(&neighbor) || tentative_g_score < g_score[&neighbor] {
                         came_from.insert(neighbor, current.pos);
                         g_score.insert(neighbor, tentative_g_score);
-                        let h = Self::heuristic(neighbor, goal);
-                        let f = tentative_g_score + h;
+                        let h = Self::heuristic(neighbor, goal); // Estimated cost to goal
+                        let f = tentative_g_score + h; // Total estimated cost
                         f_score.insert(neighbor, f);
                         open_set.push(Node { pos: neighbor, f_score: f });
 
@@ -184,6 +186,7 @@ impl GameState {
         (vec![], debug_info) // No path found
     }
 
+    // Our heuristic uses Manhattan distance
     fn heuristic(pos: Position, goal: Position) -> i32 {
         ((pos.x as i32 - goal.x as i32).abs() + (pos.y as i32 - goal.y as i32).abs()) as i32
     }
@@ -229,28 +232,30 @@ impl GameState {
                 let pos = Position { x, y };
 
                 // Draw cell background based on debug info
-                if let Some(info) = self.debug_info.get(&pos) {
-                    let bg_color = if info.in_final_path {
-                        Color::new(0.8, 1.0, 0.8, 0.3) // Light green for path
-                    } else if info.in_closed_set {
-                        Color::new(1.0, 0.8, 0.8, 0.3) // Light red for closed set
-                    } else if info.in_open_set {
-                        Color::new(0.8, 0.8, 1.0, 0.3) // Light blue for open set
-                    } else {
-                        WHITE
-                    };
-                    draw_rectangle(cell_x, cell_y, CELL_SIZE, CELL_SIZE, bg_color);
+                if self.show_debug {
+                    if let Some(info) = self.debug_info.get(&pos) {
+                        let bg_color = if info.in_final_path {
+                            Color::new(0.8, 1.0, 0.8, 0.3) // Light green for path
+                        } else if info.in_closed_set {
+                            Color::new(1.0, 0.8, 0.8, 0.3) // Light red for closed set
+                        } else if info.in_open_set {
+                            Color::new(0.8, 0.8, 1.0, 0.3) // Light blue for open set
+                        } else {
+                            WHITE
+                        };
+                        draw_rectangle(cell_x, cell_y, CELL_SIZE, CELL_SIZE, bg_color);
 
-                    // Draw debug text
-                    let text_y_offset = FONT_SIZE + 2.0;
-                    if let Some(f) = info.f_score {
-                        draw_text(&format!("f={}", f), cell_x + 4.0, cell_y + text_y_offset, FONT_SIZE, BLACK);
-                    }
-                    if let Some(g) = info.g_score {
-                        draw_text(&format!("g={}", g), cell_x + 4.0, cell_y + text_y_offset * 2.0, FONT_SIZE, BLACK);
-                    }
-                    if let Some(h) = info.h_score {
-                        draw_text(&format!("h={}", h), cell_x + 4.0, cell_y + text_y_offset * 3.0, FONT_SIZE, BLACK);
+                        // Draw debug text
+                        let text_y_offset = FONT_SIZE + 2.0;
+                        if let Some(f) = info.f_score {
+                            draw_text(&format!("f={}", f), cell_x + 4.0, cell_y + text_y_offset, FONT_SIZE, BLACK);
+                        }
+                        if let Some(g) = info.g_score {
+                            draw_text(&format!("g={}", g), cell_x + 4.0, cell_y + text_y_offset * 2.0, FONT_SIZE, BLACK);
+                        }
+                        if let Some(h) = info.h_score {
+                            draw_text(&format!("h={}", h), cell_x + 4.0, cell_y + text_y_offset * 3.0, FONT_SIZE, BLACK);
+                        }
                     }
                 }
 
@@ -297,23 +302,25 @@ impl GameState {
 
         // Draw instructions
         draw_text(
-            "Press SPACE to generate new maze",
+            "Press SPACE to generate new maze | Press D to toggle debug view",
             PADDING,
             WINDOW_HEIGHT - PADDING / 2.0,
             20.0,
             BLACK,
         );
 
-        // Draw legend
-        let legend_x = WINDOW_WIDTH - 200.0;
-        let legend_y = PADDING;
-        draw_text("Legend:", legend_x, legend_y, 20.0, BLACK);
-        draw_rectangle(legend_x, legend_y + 30.0, 20.0, 20.0, Color::new(0.8, 1.0, 0.8, 0.3));
-        draw_text("Final Path", legend_x + 30.0, legend_y + 45.0, 16.0, BLACK);
-        draw_rectangle(legend_x, legend_y + 60.0, 20.0, 20.0, Color::new(1.0, 0.8, 0.8, 0.3));
-        draw_text("Closed Set", legend_x + 30.0, legend_y + 75.0, 16.0, BLACK);
-        draw_rectangle(legend_x, legend_y + 90.0, 20.0, 20.0, Color::new(0.8, 0.8, 1.0, 0.3));
-        draw_text("Open Set", legend_x + 30.0, legend_y + 105.0, 16.0, BLACK);
+        // Draw legend only when debug is enabled
+        if self.show_debug {
+            let legend_x = WINDOW_WIDTH - 200.0;
+            let legend_y = PADDING;
+            draw_text("Legend:", legend_x, legend_y, 20.0, BLACK);
+            draw_rectangle(legend_x, legend_y + 30.0, 20.0, 20.0, Color::new(0.8, 1.0, 0.8, 0.3));
+            draw_text("Final Path", legend_x + 30.0, legend_y + 45.0, 16.0, BLACK);
+            draw_rectangle(legend_x, legend_y + 60.0, 20.0, 20.0, Color::new(1.0, 0.8, 0.8, 0.3));
+            draw_text("Closed Set", legend_x + 30.0, legend_y + 75.0, 16.0, BLACK);
+            draw_rectangle(legend_x, legend_y + 90.0, 20.0, 20.0, Color::new(0.8, 0.8, 1.0, 0.3));
+            draw_text("Open Set", legend_x + 30.0, legend_y + 105.0, 16.0, BLACK);
+        }
     }
 }
 
@@ -332,7 +339,7 @@ async fn main() {
         OrthogonalMazeBuilder::new()
             .height(MAZE_HEIGHT)
             .width(MAZE_WIDTH)
-            .algorithm(Box::new(Prim::new()))
+            .algorithm(Box::new(Kruskal))
             .build()
     );
 
@@ -342,9 +349,13 @@ async fn main() {
                 OrthogonalMazeBuilder::new()
                     .height(MAZE_HEIGHT)
                     .width(MAZE_WIDTH)
-                    .algorithm(Box::new(Prim::new()))
+                    .algorithm(Box::new(Kruskal))
                     .build()
             );
+        }
+
+        if is_key_pressed(KeyCode::D) {
+            game.show_debug = !game.show_debug;
         }
 
         game.update();
