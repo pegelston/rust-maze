@@ -13,8 +13,8 @@ const WALL_THICKNESS: f32 = 2.0;
 const OFFSET_X: f32 = 50.0;  // Padding from left
 const OFFSET_Y: f32 = 50.0;  // Padding from top
 
-const WINDOW_WIDTH: f32 = 1000.0;
-const WINDOW_HEIGHT: f32 = 1000.0;
+const WINDOW_WIDTH: f32 = 800.0;
+const WINDOW_HEIGHT: f32 = 600.0;
 
 fn window_conf() -> Conf {
     Conf {
@@ -38,12 +38,46 @@ async fn main() {
 
         for y in 0..maze.height() {
             for x in 0..maze.width() {
+                // North wall
                 if !maze.is_carved((x, y), Cell::NORTH) {
                     draw_rectangle(
                         OFFSET_X + x as f32 * CELL_SIZE,
                         OFFSET_Y + y as f32 * CELL_SIZE,
                         CELL_SIZE,
                         WALL_THICKNESS,
+                        BLACK,
+                    );
+                }
+
+                // West wall
+                if !maze.is_carved((x, y), Cell::WEST) {
+                    draw_rectangle(
+                        OFFSET_X + x as f32 * CELL_SIZE,
+                        OFFSET_Y + y as f32 * CELL_SIZE,
+                        WALL_THICKNESS,
+                        CELL_SIZE,
+                        BLACK,
+                    );
+                }
+
+                // South wall
+                if !maze.is_carved((x, y), Cell::SOUTH) {
+                    draw_rectangle(
+                        OFFSET_X + x as f32 * CELL_SIZE,
+                        OFFSET_Y + (y + 1) as f32 * CELL_SIZE - WALL_THICKNESS,
+                        CELL_SIZE,
+                        WALL_THICKNESS,
+                        BLACK,
+                    );
+                }
+
+                // East wall
+                if !maze.is_carved((x, y), Cell::EAST) {
+                    draw_rectangle(
+                        OFFSET_X + (x + 1) as f32 * CELL_SIZE - WALL_THICKNESS,
+                        OFFSET_Y + y as f32 * CELL_SIZE,
+                        WALL_THICKNESS,
+                        CELL_SIZE,
                         BLACK,
                     );
                 }
