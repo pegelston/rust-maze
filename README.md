@@ -12,6 +12,8 @@ A visual maze generation and pathfinding demonstration built with Rust, using ma
 
 ## Building and Running
 
+### Development Build
+
 1. Ensure you have Rust installed (built with rust v1.87.0)
 2. Clone this repository
 3. Clone the forked knossos repository:
@@ -78,3 +80,21 @@ The pathfinding uses the A* algorithm, which:
 - [knossos](https://crates.io/crates/knossos) (1.2.0): Maze generation algorithms
 - [rand](https://crates.io/crates/rand) (0.8.5): Random number generation
 
+### Production Build
+
+For optimal performance, build with release optimizations:
+
+```bash
+# Build the release version
+cargo build --release
+
+# Run the release version
+./target/release/rust-maze
+```
+
+The release build includes:
+- Full optimization (`-O3`)
+- Link-time optimization (LTO)
+- Improved runtime performance
+- Smaller binary size
+- Disabled debug assertions

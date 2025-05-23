@@ -9,3 +9,10 @@ edition = "2021"
 macroquad = "0.4.4"
 rand = "0.8.5"
 knossos = { version = "1.2.0", path = "../knossos" }
+
+[profile.release]
+opt-level = 3        # Maximum optimization
+lto = true           # Enable link-time optimization
+codegen-units = 1    # Maximize optimization potential
+panic = 'abort'      # Remove panic unwinding code
+strip = true         # Strip symbols from binary
