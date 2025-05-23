@@ -7,14 +7,21 @@ use knossos::{
     },
 };
 
-const CELL_SIZE: f32 = 40.0;  // Made cells bigger for better visibility
+const CELL_SIZE: f32 = 40.0;
 const WALL_THICKNESS: f32 = 2.0;
+const PADDING: f32 = 20.0;  // Smaller padding around the maze
 
-const OFFSET_X: f32 = 50.0;  // Padding from left
-const OFFSET_Y: f32 = 50.0;  // Padding from top
+// Define maze dimensions
+const MAZE_WIDTH: usize = 15;  // Number of cells horizontally
+const MAZE_HEIGHT: usize = 15; // Number of cells vertically
 
-const WINDOW_WIDTH: f32 = 800.0;
-const WINDOW_HEIGHT: f32 = 600.0;
+// Calculate window dimensions based on maze size
+const WINDOW_WIDTH: f32 = PADDING * 2.0 + CELL_SIZE * MAZE_WIDTH as f32;
+const WINDOW_HEIGHT: f32 = PADDING * 2.0 + CELL_SIZE * MAZE_HEIGHT as f32;
+
+// Calculate offset to center the maze
+const OFFSET_X: f32 = PADDING;
+const OFFSET_Y: f32 = PADDING;
 
 fn window_conf() -> Conf {
     Conf {
@@ -27,15 +34,16 @@ fn window_conf() -> Conf {
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    let maze = OrthogonalMazeBuilder::new()
-        .height((WINDOW_HEIGHT / CELL_SIZE) as usize)
-        .width((WINDOW_WIDTH / CELL_SIZE) as usize)
+    let mut maze = OrthogonalMazeBuilder::new()
+        .height(MAZE_HEIGHT)
+        .width(MAZE_WIDTH)
         .algorithm(Box::new(Prim::new()))
         .build();
 
     loop {
         clear_background(WHITE);
 
+        // Draw the maze
         for y in 0..maze.height() {
             for x in 0..maze.width() {
                 // North wall
@@ -82,6 +90,24 @@ async fn main() {
                     );
                 }
             }
+        }
+
+        // Draw instructions
+        draw_text(
+            "Press SPACE to generate new maze",
+            PADDING,
+            WINDOW_HEIGHT - PADDING / 2.0,
+            20.0,
+            BLACK,
+        );
+
+        // Generate new maze when space is pressed
+        if is_key_pressed(KeyCode::Space) {
+            maze = OrthogonalMazeBuilder::new()
+                .height(MAZE_HEIGHT)
+                .width(MAZE_WIDTH)
+                .algorithm(Box::new(Prim::new()))
+                .build();
         }
         
         next_frame().await
