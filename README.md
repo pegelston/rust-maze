@@ -6,7 +6,16 @@ A visual maze generation and pathfinding demonstration built with Rust, using ma
 
 1. Ensure you have Rust installed (built with rust v1.87.0)
 2. Clone this repository
-3. Run with:
+3. Clone the forked knossos repository:
+   ```bash
+   # From the parent directory of rust-maze
+   git clone https://github.com/pegelston/knossos.git
+   cd knossos
+   git checkout pegelston/pub-mod
+   cd ../rust-maze
+   ```
+   Note: The knossos repository must be located at `../knossos` relative to the rust-maze project root.
+4. Run with:
    ```bash
    cargo run
    ```
