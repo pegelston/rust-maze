@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 macroquad = "0.4.4"
+rand = "0.8.5"
+knossos = { version = "1.2.0", path = "../knossos" }
